@@ -4,6 +4,14 @@ import (
 	"fmt"
 )
 
+type Vehicle interface {
+	move()
+}
+
+type car struct {
+	name string
+}
+
 type person struct{
 	name string
 	age uint8
@@ -18,10 +26,17 @@ type contacts struct {
 func main() {
 	var people person=person{"Alexandr",20, contacts{"alex@gmail.com","+380990000000"}}
 	people.name="Andrej"
-	var q *person = &people
-	q.input()
+	//var q *person = &people
+	//q.input()
 	people.print()
+	var car1 Vehicle=car{"BMW"}
+	car2:=car{"Volvo"}
+	car1.move()
+	car2.move()
+}
 
+func (c car) move() {
+	fmt.Println(c.name, " goes")
 }
 
 func (l *person) input() {
