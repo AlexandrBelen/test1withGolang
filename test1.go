@@ -12,9 +12,9 @@ type car struct {
 	name string
 }
 
-type person struct{
+type person struct {
 	name string
-	age uint8
+	age  uint8
 	contacts
 }
 
@@ -24,15 +24,41 @@ type contacts struct {
 }
 
 func main() {
-	var people person=person{"Alexandr",20, contacts{"alex@gmail.com","+380990000000"}}
-	people.name="Andrej"
+	var intCh chan int = make(chan int, 3)
+	go factorial(5, intCh)
+	strCh := make(chan string, 3)
+	strCh <- "Alex"
+	fmt.Println(cap(strCh))
+	fmt.Println(len(strCh))
+	fmt.Println(<-intCh)
+	close(intCh)
+	close(strCh)
+	for i := 0; i < cap(intCh); i++ {
+		if val, opened := <-intCh; opened {
+			fmt.Println(val)
+		} else {
+			fmt.Println("Channel closed!")
+			break
+		}
+	}
+
+	results := make(map[int]int)
+	structCh := make(chan struct{})
+	go factorial2(5, structCh, results)
+	<-structCh
+	for i, v := range results {
+		fmt.Println(i, " - ", v)
+	}
+
+	/*var people person = person{"Alexandr", 20, contacts{"alex@gmail.com", "+380990000000"}}
+	people.name = "Andrej"
 	//var q *person = &people
 	//q.input()
 	people.print()
-	var car1 Vehicle=car{"BMW"}
-	car2:=car{"Volvo"}
+	var car1 Vehicle = car{"BMW"}
+	car2 := car{"Volvo"}
 	car1.move()
-	car2.move()
+	car2.move()*/
 }
 
 func (c car) move() {
@@ -52,22 +78,29 @@ func (l *person) input() {
 
 func (l person) print() {
 	fmt.Println("Name:", l.name)
-	fmt.Println("Age:",l.age)
-	fmt.Println("Email",l.email)
-	fmt.Println("Phone:",l.phone)
+	fmt.Println("Age:", l.age)
+	fmt.Println("Email", l.email)
+	fmt.Println("Phone:", l.phone)
 }
 
-func factorial(n uint) uint {
-	if n >= 0 {
-		if n == 0 {
-			return 1
-		}
-		return n * factorial(n-1)
-	} else {
-		fmt.Println("wrong number")
-		return 0
-	}
+func factorial(n int, ch chan int) {
 
+	result := 1
+	for i := 1; i <= n; i++ {
+		result *= i
+	}
+	fmt.Println(n, "-", result)
+
+	ch <- result
+}
+
+func factorial2(n int, ch chan struct{}, results map[int]int) {
+	defer close(ch)
+	result := 1
+	for i := 1; i <= n; i++ {
+		result *= i
+		results[i] = result
+	}
 }
 
 func divide(x, y float64) float64 {
@@ -75,8 +108,4 @@ func divide(x, y float64) float64 {
 		panic("Division by zero!")
 	}
 	return x / y
-}
-
-func changeValue(x *int) {
-	*x = (*x) * (*x)
 }
